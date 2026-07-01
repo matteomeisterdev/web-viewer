@@ -43,7 +43,7 @@ Two ways, no redeploy required for the second:
    `SourceLocation` in `manifest.xml` (or when embedding manually). Example:
 
    ```
-   https://YOUR-ADDIN-HOST/index.html?src=https%3A%2F%2Fionto-dashboard.fly.dev%2F%3Fpage%3Dmicrofluidic%26mf_run%3D36
+   https://matteomeisterdev.github.io/web-viewer/index.html?src=https%3A%2F%2Fionto-dashboard.fly.dev%2F%3Fpage%3Dmicrofluidic%26mf_run%3D36
    ```
 
    Only `https://` URLs are accepted; anything else silently falls back to
@@ -56,42 +56,18 @@ HTTPS hosting. Two realistic options:
 
 | Option | Effort | Tradeoff |
 |---|---|---|
-| **GitHub Pages** (recommended) | Push this folder to a repo, flip on Pages in settings. Done. | Fully decoupled from the Streamlit deploy — editing the add-in never touches the running dashboard container, and there's no Dockerfile/static-route wiring to get right. Free, HTTPS by default. |
-| **Static route on the existing Fly app** | Add a route/static-file handler to the Streamlit container (Streamlit itself doesn't serve arbitrary static files well — you'd need a small nginx sidecar or a separate Fly process in the same app) and redeploy the whole app for any add-in tweak. | Only worth it if you want everything under one domain/deploy pipeline; otherwise it's strictly more work for no benefit here. |
+| **GitHub Pages** (recommended, in use) | Push this folder to a repo, flip on Pages in settings. Done. | Fully decoupled from the Streamlit deploy — editing the add-in never touches the running dashboard container, and there's no Dockerfile/static-route wiring to get right. Free, HTTPS by default. **Caveat:** GitHub Pages requires a *public* repo unless you're on GitHub Pro/Team/Enterprise — `matteomeisterdev/web-viewer` was flipped from private to public for this reason. Nothing sensitive lives in it (just the iframe wrapper pointing at the already-public dashboard URL). |
+| **Static route on the existing Fly app** | Add a route/static-file handler to the Streamlit container (Streamlit itself doesn't serve arbitrary static files well — you'd need a small nginx sidecar or a separate Fly process in the same app) and redeploy the whole app for any add-in tweak. | Only worth it if you want everything under one domain/deploy pipeline, or need the files to stay in a private repo; otherwise it's strictly more work for no benefit here. |
 
-**Recommendation: GitHub Pages.** For a single demo, it's less to set up and
-keeps add-in edits (instant, just `git push`) independent from dashboard
-deploys (`fly deploy`).
-
-Steps:
-
-```bash
-# from this folder
-git init
-git add manifest.xml index.html assets README.md
-git commit -m "Content add-in for Ionto dashboard"
-git branch -M main
-git remote add origin https://github.com/<you>/ionto-dashboard-addin.git
-git push -u origin main
-```
-
-Then in the repo: **Settings → Pages → Deploy from a branch → `main` / root**.
-Your files will be live at:
+**Live at:**
 
 ```
-https://<you>.github.io/ionto-dashboard-addin/index.html
-https://<you>.github.io/ionto-dashboard-addin/manifest.xml
+https://matteomeisterdev.github.io/web-viewer/index.html
+https://matteomeisterdev.github.io/web-viewer/manifest.xml
 ```
 
-**Before sideloading**, replace every `YOUR-ADDIN-HOST` placeholder in
-`manifest.xml` with that actual GitHub Pages host
-(`<you>.github.io/ionto-dashboard-addin`), e.g.:
-
-```xml
-<AppDomain>https://<you>.github.io</AppDomain>
-...
-<SourceLocation DefaultValue="https://<you>.github.io/ionto-dashboard-addin/index.html" />
-```
+`manifest.xml` already points at these URLs (`AppDomain`, `IconUrl`,
+`HighResolutionIconUrl`, `SourceLocation`) — no placeholder swap needed.
 
 ## Redeploying after edits
 

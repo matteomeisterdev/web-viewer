@@ -10,13 +10,13 @@
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Ionto Live Dashboard" />
   <Description DefaultValue="Embeds the live Ionto microfluidic dashboard directly on a slide." />
-  <IconUrl DefaultValue="https://YOUR-ADDIN-HOST/assets/icon-32.png" />
-  <HighResolutionIconUrl DefaultValue="https://YOUR-ADDIN-HOST/assets/icon-64.png" />
+  <IconUrl DefaultValue="https://matteomeisterdev.github.io/web-viewer/assets/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://matteomeisterdev.github.io/web-viewer/assets/icon-64.png" />
   <SupportUrl DefaultValue="https://ionto-dashboard.fly.dev" />
 
   <AppDomains>
     <AppDomain>https://ionto-dashboard.fly.dev</AppDomain>
-    <AppDomain>https://YOUR-ADDIN-HOST</AppDomain>
+    <AppDomain>https://matteomeisterdev.github.io</AppDomain>
   </AppDomains>
 
   <Hosts>
@@ -30,7 +30,7 @@
   </Requirements>
 
   <DefaultSettings>
-    <SourceLocation DefaultValue="https://YOUR-ADDIN-HOST/index.html" />
+    <SourceLocation DefaultValue="https://matteomeisterdev.github.io/web-viewer/index.html" />
     <RequestedWidth>960</RequestedWidth>
     <RequestedHeight>720</RequestedHeight>
   </DefaultSettings>
