@@ -194,6 +194,25 @@
 
     frame.src = targetUrl;
 
+    // Reload to the latest run whenever the add-in becomes visible again — e.g.
+    // navigating back to this slide, or entering Slide Show. targetUrl pins no
+    // mf_run, so the app re-resolves to the most recent run on each reload,
+    // guaranteeing the newest data is on screen when you present the slide.
+    // Debounced so transient focus changes don't cause a reload storm.
+    var lastReload = Date.now();
+    function reloadToLatest() {
+      if (Date.now() - lastReload < 3000) return;
+      lastReload = Date.now();
+      loaded = false;
+      frame.src = targetUrl;
+    }
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible") reloadToLatest();
+    });
+    window.addEventListener("pageshow", function (e) {
+      if (e.persisted) reloadToLatest();
+    });
+
     if (window.Office && Office.onReady) {
       Office.onReady();
     }
