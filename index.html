@@ -104,8 +104,10 @@
 <script>
   (function () {
     // 1. Change this constant to permanently change the embedded dashboard.
+    // No mf_run pinned on purpose: the app defaults the events view to the
+    // most recent run, so the embed always shows the latest data on demo day.
     var DEFAULT_DASHBOARD_URL =
-      "https://ionto-dashboard.fly.dev/?page=microfluidic&mf_run=35&mf_view=events&demo_token=5q1cJ-V6B2zSAh1Jr8AdlLaTJoHfTe42_zRl5wR3_pk";
+      "https://ionto-dashboard.fly.dev/?page=microfluidic&mf_view=events&demo_token=5q1cJ-V6B2zSAh1Jr8AdlLaTJoHfTe42_zRl5wR3_pk";
 
     var FALLBACK_TIMEOUT_MS = 6000;
 
