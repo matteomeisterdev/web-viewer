@@ -19,14 +19,15 @@
     font-family: "Segoe UI", Arial, sans-serif;
   }
 
+  /* The frame is sized/scaled in JS. transform-origin top-left so scaling
+     keeps the top-left pinned to the add-in surface corner. */
   #dashboard-frame {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
     border: 0;
     display: block;
+    transform-origin: top left;
   }
 
   #fallback {
@@ -76,6 +77,13 @@
     Change DEFAULT_DASHBOARD_URL and redeploy to permanently change the target,
     or point the manifest's SourceLocation at this page with a ?src= param to
     override without editing this file.
+
+    Zoom / responsiveness:
+      The iframe is rendered at a fixed *logical* width (so the dashboard draws
+      its full desktop layout) and then CSS-scaled to fit the add-in surface.
+      Tune with a query param on THIS page:
+        ?w=<px>    logical width to render at (default 1280). Bigger = more
+                   content visible / more zoomed out; smaller = zoomed in.
   -->
   <iframe id="dashboard-frame" title="Live dashboard" allow="fullscreen"></iframe>
 
@@ -97,8 +105,7 @@
     var FALLBACK_TIMEOUT_MS = 6000;
 
     function getTargetUrl() {
-      var params = new URLSearchParams(window.location.search);
-      var src = params.get("src");
+      var src = new URLSearchParams(window.location.search).get("src");
       if (!src) {
         return DEFAULT_DASHBOARD_URL;
       }
@@ -115,12 +122,40 @@
       }
     }
 
+    var params = new URLSearchParams(window.location.search);
+
+    // Logical width the iframe is rendered at before scaling. The dashboard
+    // lays itself out for this width, then we scale the whole thing to fit.
+    var LOGICAL_WIDTH = parseInt(params.get("w"), 10);
+    if (!LOGICAL_WIDTH || LOGICAL_WIDTH < 320) {
+      LOGICAL_WIDTH = 1280;
+    }
+
     var targetUrl = getTargetUrl();
     var frame = document.getElementById("dashboard-frame");
     var fallback = document.getElementById("fallback");
     var fallbackUrl = document.getElementById("fallback-url");
     fallbackUrl.href = targetUrl;
     fallbackUrl.textContent = targetUrl;
+
+    // Render the iframe at LOGICAL_WIDTH so the dashboard draws its full
+    // desktop layout, then scale it to fill the add-in surface width. The
+    // logical height is set so that, after scaling, it fills the surface
+    // exactly — no letterboxing and no inner scrollbar.
+    function fit() {
+      var vw = window.innerWidth || document.documentElement.clientWidth;
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      if (!vw || !vh) return;
+
+      var scale = vw / LOGICAL_WIDTH;
+      frame.style.width = LOGICAL_WIDTH + "px";
+      frame.style.height = Math.round(vh / scale) + "px";
+      frame.style.transform = "scale(" + scale + ")";
+    }
+
+    window.addEventListener("resize", fit);
+    frame.addEventListener("load", fit);
+    fit();
 
     var loaded = false;
 
