@@ -213,6 +213,41 @@
       if (e.persisted) reloadToLatest();
     });
 
+    // Slide navigation from the add-in. A content add-in grabs focus, so the
+    // presenter's arrow keys can get swallowed instead of advancing the deck.
+    // When focus is on THIS wrapper (not inside the cross-origin dashboard
+    // iframe, whose key events we can't see), forward navigation keys to
+    // PowerPoint via the Office API. Note: this drives the editing-view
+    // selection; a running Slide Show can't be advanced through the API, so in
+    // Slide Show click the slide area outside the add-in (or press Esc) to
+    // return focus to the show before using the arrows.
+    function goSlide(index) {
+      try {
+        if (Office.context && Office.context.document &&
+            Office.context.document.goToByIdAsync) {
+          Office.context.document.goToByIdAsync(index, Office.GoToType.Index,
+            function () {});
+        }
+      } catch (e) { /* API not available in this host/mode */ }
+    }
+
+    window.addEventListener("keydown", function (e) {
+      switch (e.key) {
+        case "ArrowRight":
+        case "PageDown":
+        case " ":
+          goSlide(Office.Index.Next);
+          break;
+        case "ArrowLeft":
+        case "PageUp":
+          goSlide(Office.Index.Previous);
+          break;
+        default:
+          return;
+      }
+      e.preventDefault();
+    });
+
     if (window.Office && Office.onReady) {
       Office.onReady();
     }
