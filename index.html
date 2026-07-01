@@ -79,11 +79,16 @@
     override without editing this file.
 
     Zoom / responsiveness:
-      The iframe is rendered at a fixed *logical* width (so the dashboard draws
-      its full desktop layout) and then CSS-scaled to fit the add-in surface.
+      The dashboard has a full-height left sidebar, so its layout is
+      height-constrained: if the logical viewport is too short, the sidebar
+      gets its own scrollbar. We therefore render the iframe at a fixed
+      *logical height* (tall enough for the whole sidebar) and CSS-scale it to
+      fill the add-in surface; the logical width flexes to fill horizontally
+      (the dashboard is responsive across widths).
       Tune with a query param on THIS page:
-        ?w=<px>    logical width to render at (default 1280). Bigger = more
-                   content visible / more zoomed out; smaller = zoomed in.
+        ?h=<px>    logical height to render at (default 900). Bigger = more
+                   vertical content fits / everything smaller (zoomed out);
+                   smaller = zoomed in.
   -->
   <iframe id="dashboard-frame" title="Live dashboard" allow="fullscreen"></iframe>
 
@@ -124,11 +129,12 @@
 
     var params = new URLSearchParams(window.location.search);
 
-    // Logical width the iframe is rendered at before scaling. The dashboard
-    // lays itself out for this width, then we scale the whole thing to fit.
-    var LOGICAL_WIDTH = parseInt(params.get("w"), 10);
-    if (!LOGICAL_WIDTH || LOGICAL_WIDTH < 320) {
-      LOGICAL_WIDTH = 1280;
+    // Logical height the iframe is rendered at before scaling. Tall enough
+    // that the full-height sidebar never needs its own scrollbar; the whole
+    // thing is then scaled to fill the surface.
+    var LOGICAL_HEIGHT = parseInt(params.get("h"), 10);
+    if (!LOGICAL_HEIGHT || LOGICAL_HEIGHT < 320) {
+      LOGICAL_HEIGHT = 900;
     }
 
     var targetUrl = getTargetUrl();
@@ -138,18 +144,18 @@
     fallbackUrl.href = targetUrl;
     fallbackUrl.textContent = targetUrl;
 
-    // Render the iframe at LOGICAL_WIDTH so the dashboard draws its full
-    // desktop layout, then scale it to fill the add-in surface width. The
-    // logical height is set so that, after scaling, it fills the surface
-    // exactly — no letterboxing and no inner scrollbar.
+    // Render the iframe at LOGICAL_HEIGHT so the full-height sidebar always
+    // fits, then scale it to fill the add-in surface height. The logical width
+    // is set so that, after scaling, it fills the surface exactly — no
+    // letterboxing and no scrollbars. The dashboard reflows to that width.
     function fit() {
       var vw = window.innerWidth || document.documentElement.clientWidth;
       var vh = window.innerHeight || document.documentElement.clientHeight;
       if (!vw || !vh) return;
 
-      var scale = vw / LOGICAL_WIDTH;
-      frame.style.width = LOGICAL_WIDTH + "px";
-      frame.style.height = Math.round(vh / scale) + "px";
+      var scale = vh / LOGICAL_HEIGHT;
+      frame.style.height = LOGICAL_HEIGHT + "px";
+      frame.style.width = Math.round(vw / scale) + "px";
       frame.style.transform = "scale(" + scale + ")";
     }
 
