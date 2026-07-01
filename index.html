@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+<title>Ionto Dashboard Add-in</title>
+
+<!-- Required by every Office Add-in, even ones that never call an Office.js API -->
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #ffffff;
+    font-family: "Segoe UI", Arial, sans-serif;
+  }
+
+  #dashboard-frame {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+
+  #fallback {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 24px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: #323130;
+  }
+
+  #fallback.visible {
+    display: flex;
+  }
+
+  #fallback h1 {
+    font-size: 18px;
+    margin: 0 0 8px;
+  }
+
+  #fallback p {
+    font-size: 13px;
+    color: #605e5c;
+    margin: 0 0 4px;
+    max-width: 480px;
+  }
+
+  #fallback a {
+    color: #0078d4;
+    word-break: break-all;
+  }
+</style>
+</head>
+<body>
+
+  <!--
+    The dashboard URL comes from (in priority order):
+      1. ?src=<url> query param on this page
+      2. the DEFAULT_DASHBOARD_URL constant below
+    Change DEFAULT_DASHBOARD_URL and redeploy to permanently change the target,
+    or point the manifest's SourceLocation at this page with a ?src= param to
+    override without editing this file.
+  -->
+  <iframe id="dashboard-frame" title="Live dashboard" allow="fullscreen"></iframe>
+
+  <div id="fallback">
+    <h1>Dashboard didn't load</h1>
+    <p>
+      The embedded page may be blocking iframes (X-Frame-Options / CSP
+      frame-ancestors), or the network request failed.
+    </p>
+    <p>Target URL: <a id="fallback-url" href="#" target="_blank" rel="noopener"></a></p>
+  </div>
+
+<script>
+  (function () {
+    // 1. Change this constant to permanently change the embedded dashboard.
+    var DEFAULT_DASHBOARD_URL =
+      "https://ionto-dashboard.fly.dev/?page=microfluidic&mf_run=35&mf_view=events";
+
+    var FALLBACK_TIMEOUT_MS = 6000;
+
+    function getTargetUrl() {
+      var params = new URLSearchParams(window.location.search);
+      var src = params.get("src");
+      if (!src) {
+        return DEFAULT_DASHBOARD_URL;
+      }
+      try {
+        var parsed = new URL(src, window.location.href);
+        if (parsed.protocol !== "https:") {
+          console.warn("Ignoring non-HTTPS src param:", src);
+          return DEFAULT_DASHBOARD_URL;
+        }
+        return parsed.href;
+      } catch (e) {
+        console.warn("Ignoring invalid src param:", src);
+        return DEFAULT_DASHBOARD_URL;
+      }
+    }
+
+    var targetUrl = getTargetUrl();
+    var frame = document.getElementById("dashboard-frame");
+    var fallback = document.getElementById("fallback");
+    var fallbackUrl = document.getElementById("fallback-url");
+    fallbackUrl.href = targetUrl;
+    fallbackUrl.textContent = targetUrl;
+
+    var loaded = false;
+
+    function showFallback() {
+      if (loaded) return;
+      frame.style.display = "none";
+      fallback.classList.add("visible");
+    }
+
+    frame.addEventListener("load", function () {
+      // A blocked frame-ancestors/X-Frame-Options response still fires 'load'
+      // in most browsers (it loads an error/blank document), so 'load' alone
+      // isn't reliable proof of success. We still use it as a positive signal
+      // and rely on the timeout below to catch the negative case.
+      loaded = true;
+      fallback.classList.remove("visible");
+      frame.style.display = "block";
+    });
+
+    frame.addEventListener("error", showFallback);
+
+    // If nothing has loaded within the timeout, assume it was blocked.
+    setTimeout(function () {
+      if (!loaded) {
+        showFallback();
+      }
+    }, FALLBACK_TIMEOUT_MS);
+
+    frame.src = targetUrl;
+
+    if (window.Office && Office.onReady) {
+      Office.onReady();
+    }
+  })();
+</script>
+</body>
+</html>

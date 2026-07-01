@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+           xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+           xsi:type="ContentApp">
+  <Id>a1b2c3d4-e5f6-4789-a012-3456789abcde</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>MoleSense</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="Ionto Live Dashboard" />
+  <Description DefaultValue="Embeds the live Ionto microfluidic dashboard directly on a slide." />
+  <IconUrl DefaultValue="https://YOUR-ADDIN-HOST/assets/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://YOUR-ADDIN-HOST/assets/icon-64.png" />
+  <SupportUrl DefaultValue="https://ionto-dashboard.fly.dev" />
+
+  <AppDomains>
+    <AppDomain>https://ionto-dashboard.fly.dev</AppDomain>
+    <AppDomain>https://YOUR-ADDIN-HOST</AppDomain>
+  </AppDomains>
+
+  <Hosts>
+    <Host Name="Presentation" />
+  </Hosts>
+
+  <Requirements>
+    <Sets DefaultMinVersion="1.1">
+      <Set Name="PowerPointApi" MinVersion="1.1" />
+    </Sets>
+  </Requirements>
+
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://YOUR-ADDIN-HOST/index.html" />
+    <RequestedWidth>960</RequestedWidth>
+    <RequestedHeight>720</RequestedHeight>
+  </DefaultSettings>
+
+  <Permissions>ReadDocument</Permissions>
+</OfficeApp>
